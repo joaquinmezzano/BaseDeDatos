@@ -1,3 +1,54 @@
+--                          Universidad Nacional de Río Cuarto
+--                 Facultad de Ciencias Exactas, Físico-Químicas y Naturales
+--                              Departamento de Computación
+--                      Asignatura: BASES DE DATOS (1959) Año 2024
+
+--                             Trabajo práctico integrador
+
+-- Integrantes: -Conti, Bruno.
+--              -Mezzano, Joaquín.
+--              -Vollenweider, Erich.
+
+-- DESCRIPCION DEL PROBLEMA:
+-- Se desea crear un sitio web con información referente a las películas en cartel
+-- en las salas de un complejo de cines cercano a un conocido centro de compras.
+-- De cada película, se almacena una ficha con su título de distribución, su título
+-- original, su género, el idioma original, el título en español, los países de origen
+-- de la producción, el año de la producción, la url del sitio web de la película, la
+-- duración (en horas y minutos), la calificación (Apta todo público,+13 años, +15
+-- años,+18 años), fecha de estreno en Argentina, un resumen y un identificador de la película.
+-- De cada película interesa conocer la lista de directores, actores protagonistas y los de reparto.
+-- De los directores y actores, se conoce su nombre (que lo identifica) y su nacionalidad.
+-- Además se desea conocer la cantidad de películas en las que
+-- dirigieron o actuaron. Tenga en cuenta que hay personas que cumplen los dos roles.
+-- Los cines pueden tener más de una sala y cada semana cada uno de los cines
+-- envía la cartelera para dicha semana, indicando el detalle de las funciones.
+-- Para cada función se conoce, su código (único para todo el complejo), la fecha,
+-- la hora de comienzo, y obviamente la sala y la película que exhibe. De cada
+-- sala se sabe su número que la identifica dentro del complejo (no se repite por
+-- cine) y la cantidad de butacas que posee. De cada cine se conoce el nombre
+-- que lo identifica, su dirección y teléfono para consultas.
+
+-- Consideración a tener en cuenta en la implementación de la base de datos en un motor de base de datos:
+-- · Utilice códigos cuando lo crea conveniente.
+-- · Los diferentes códigos deben ser generados automáticamente.
+-- · Crear un dominio para la calificación de las películas.
+-- · Todos los códigos o números identificatorios deben ser enteros positivos.
+-- · Los títulos originales de las películas deben ser ingresados, si o si en mayúsculas.
+-- · Se debe llevar una tabla de auditoria donde quede registrado todos los cambios que se han hecho en la fecha de estreno de una película y cuando fueron hechos.
+-- · Agregue las restricciones de dominio que crea convenientes
+
+-- Tareas a Realizar Utilizando el lenguaje SQL:
+-- 3. Definir el diccionario de datos creando:
+--  . La base de datos.
+--  . Las tablas componentes con todas las restricciones que el problema requiere
+--    (claves primarias, claves foráneas indicando que hacer al borrar o actualizar, etc.). Implementar las restricciones de tipos.
+-- 4. Generar un script SQL para la carga de información en la base de datos
+--    (archivo de texto con el código SQL para la inserción de datos).
+
+CREATE DATABASE ProyectoCMV;
+USE ProyectoCMV;
+
 CREATE TABLE Personal(
 	nombre VARCHAR(50) NOT NULL,
     nacionalidad VARCHAR(20) NOT NULL,
@@ -134,11 +185,13 @@ INSERT INTO Personal (nombre, nacionalidad, cantidad_peliculas) VALUES
 ('Jordana Brewster', 'Panameño', 5),
 ('Chad Lindberg', 'Estadounidense', 1),
 ('Johnny Strong', 'Estadounidense', 4),
-('Reggie Lee', 'Filipino', 1);
+('Reggie Lee', 'Filipino', 1),
+('Jon Favreau', 'Estadounidense', 1);
 
 INSERT INTO Director (nombre_director) VALUES
 ('Justin Lin'),
-('James Wan');
+('James Wan'),
+('Jon Favreau');
 
 INSERT INTO Protagonista (nombre_protagonista) VALUES
 ('Vin Diesel'),
@@ -149,7 +202,8 @@ INSERT INTO Protagonista (nombre_protagonista) VALUES
 INSERT INTO Reparto (nombre_reparto) VALUES
 ('Chad Lindberg'),
 ('Johnny Strong'),
-('Reggie Lee');
+('Reggie Lee'),
+('Jon Favreau');
 
 INSERT INTO Pelicula (id_pelicula, titulo_distribucion, titulo_original, titulo_español, genero, idioma_original, año_produccion, resumen, fecha_estreno, duracion, url, calificacion, nombre_d) VALUES
 (1, 'The Fast and The Furious', 'the fast AND THE FURIOUS', 'Rápido y Furioso', 'Acción', 'Inglés', 2001, 'Un policía encubierto se infiltra en una subcultura del inframundo de corredores callejeros de Los Ángeles que buscan reventar una red de secuestros, y pronto comienza a cuestionar sus lealtades.', '2001-06-22', '01:47:00', 'http://www.rapidosyfuriosos.com.ar/franchise.php?id=4', '+ 13 años', 'Justin Lin'),
@@ -222,6 +276,38 @@ INSERT INTO Funcion (codigo, fecha, hora_comienzo, numero_sala, id_peli) VALUES
 (6, '2024-05-10', '14:00:00', 5, 4),
 (7, '2024-05-15', '15:30:00', 6, 5);
 
-UPDATE Pelicula SET fecha_estreno = '2020-06-01' WHERE id_pelicula = 1;
 
-select * from Auditoria;
+-- Para probar que funciona la auditoria
+-- select * from Auditoria;
+-- select * from Pelicula where id_pelicula = 1;
+-- UPDATE Pelicula SET fecha_estreno = '2020-06-01' WHERE id_pelicula = 1;
+
+-- Para probar que funciona el dominio de la calificacion de las peliculas
+-- INSERT INTO Pelicula (id_pelicula, titulo_distribucion, titulo_original, titulo_español, genero, idioma_original, año_produccion, resumen, fecha_estreno, duracion, url, calificacion, nombre_d) VALUES
+-- (8, 'Iron Man', 'IRON MAN', 'El hombre de hierro', 'Acción', 'Inglés', 2008, 'Tony Stark es un inventor de armamento brillante que es secuestrado en el extranjero. Sus captores son unos terroristas que le obligan a construir una máquina destructiva pero Tony se construirá una armadura para poder enfrentarse a ellos y escapar.', '2008-04-30', '02:06:00', 'https://www.marvel.com/', '+ 9 años', 'Jon Favreau');
+
+
+-- Para probar los DELETE SET NULL y DELETE ON CASCADE
+-- INSERT INTO Personal (nombre, nacionalidad, cantidad_peliculas) VALUES
+-- ('Jon Favreau', 'Estadounidense', 1);
+
+-- INSERT INTO Director (nombre_director) VALUES
+-- ('Jon Favreau');
+
+-- INSERT INTO Reparto (nombre_reparto) VALUES
+-- Jon Favreau');
+
+-- INSERT INTO Pelicula (id_pelicula, titulo_distribucion, titulo_original, titulo_español, genero, idioma_original, año_produccion, resumen, fecha_estreno, duracion, url, calificacion, nombre_d) VALUES
+-- (8, 'Iron Man', 'IRON MAN', 'El hombre de hierro', 'Acción', 'Inglés', 2008, 'Tony Stark es un inventor de armamento brillante que es secuestrado en el extranjero. Sus captores son unos terroristas que le obligan a construir una máquina destructiva pero Tony se construirá una armadura para poder enfrentarse a ellos y escapar.', '2008-04-30', '02:06:00', 'https://www.marvel.com/', '+ 15 años', 'Jon Favreau');
+
+-- INSERT INTO Participo (ident_pelicula, nombre_r) VALUES
+-- (8, 'Jon Favreau');
+
+-- SELECT * FROM Personal;
+-- SELECT * FROM Director;
+-- SELECT * FROM Reparto;
+-- DELETE FROM Personal WHERE nombre = 'Jon Favreau';
+
+-- SELECT * FROM Pelicula;
+-- SELECT * FROM Participo;
+-- DELETE FROM Pelicula WHERE id_pelicula = 8;
