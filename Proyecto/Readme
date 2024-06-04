@@ -1,0 +1,5 @@
+How to compile:
+javac -cp .:(route to mysql-connector-java-8.0.20.jar) ProyectoCMV.java
+java -cp .:(route to mysql-connector-java-8.0.20.jar) ProyectoCMV
+
+mysql-connector-java-8.0.20.jar is in lib folder
