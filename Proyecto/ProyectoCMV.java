@@ -11,9 +11,9 @@ import java.io.*;
  * @version 1.0
  */
 
-public class ProyectoInsert {
+public class ProyectoCMV {
 
-  public ProyectoInsert() {
+  public ProyectoCMV() {
     try {
     	/*  codigo para leer desde consola
         try
@@ -36,9 +36,9 @@ public class ProyectoInsert {
 
     try {
       String driver = "com.mysql.cj.jdbc.Driver";
-      String url = "jdbc:mysql://localhost:3306/Proyecto";
+      String url = "jdbc:mysql://localhost:3306/ProyectoCMV";
       String username = "root";
-      String password = "root";
+      String password = "joaquin";
 
         try
         {
@@ -56,7 +56,7 @@ public class ProyectoInsert {
  
       // para trabajar con transacciones
       connection.setAutoCommit(false); 
-      String query = "insert into cine (NOMBRE,DIRECCION,TELEFONO) values(?,?,?)";
+      String query = "insert into Cine (NOMBRE,DIRECCION,TELEFONO) values(?,?,?)";
 
       PreparedStatement statement = connection.prepareStatement(query);
       // Send query to database and store results.
@@ -74,7 +74,7 @@ public class ProyectoInsert {
         tel = scan.nextLine();
 
         System.out.println("Nombre: "+nombre+" - Direcciòn: "+dir+" - Telefono: "+tel);
-        System.out.print("¿Los datos son correctos? SI(1) - NO(0)");
+        System.out.println("¿Los datos son correctos? SI(1) - NO(0)");
         res = scan.nextInt();
         if (res == 1) {
           insertado = true;
