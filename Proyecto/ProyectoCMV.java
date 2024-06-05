@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ProyectoCMV {
@@ -30,7 +32,7 @@ public class ProyectoCMV {
         System.out.println("Menú de opciones");
         System.out.println("1. Insertar un cine");
         System.out.println("2. Insertar una sala en un cine");
-        System.out.println("3. Listar los cines con al información de sus salas");
+        System.out.println("3. Listar los cines con la información de sus salas");
         System.out.println("4. Salir");
         System.out.print("Seleccione una de las opciones: ");
         int choice = scanner.nextInt();
@@ -74,24 +76,40 @@ public class ProyectoCMV {
 
             break;
           case 2:
-            query = "INSERT INTO Sala (NUMERO, CANTIDAD_BUTACAS, NOMBRE_CINE) VALUES (?, ?, ?)";
-            statement = connection.prepareStatement(query);
             insertado = false;
-            int numero = 0, cantidad_butacas = 0;
+            int numero = 0, numeroF = 0, cantidad_butacas = 0;
             String nombre_cine = "";
             res = 0;
 
             while(!insertado) {
-              System.out.print("Inserte el número de la sala: ");
-              numero = scanner.nextInt();
-              scanner.nextLine();
               System.out.print("Inserte la cantidad de butacas de la sala: ");
               cantidad_butacas = scanner.nextInt();
               scanner.nextLine();
               System.out.print("Inserte el nombre del cine al que pertenece la sala: ");
               nombre_cine = scanner.nextLine();
             
-              System.out.println("Número: "+numero+" - Cantidad de butacas: "+cantidad_butacas
+              // Obtener el número de sala a crear
+              query = "SELECT COUNT(numero) AS max_numero FROM Sala";
+              statement = connection.prepareStatement(query);
+              ResultSet result = statement.executeQuery();
+              if (result.next()) {
+                numero = result.getInt("max_numero")+1;
+              } else {
+                numero = 1;
+              }
+
+              // Obtener el número a mostrar, el no real
+              query = "SELECT COUNT(numero) AS max_numero FROM Sala WHERE nombre_cine = ?";
+              statement = connection.prepareStatement(query);
+              statement.setString(1, nombre_cine);
+              result = statement.executeQuery();
+              if (result.next()) {
+                numeroF = result.getInt("max_numero")+1;
+              } else {
+                numeroF = 1;
+              }
+
+              System.out.println("Número de sala: "+numeroF+" - Cantidad de butacas: "+cantidad_butacas
               +" - Nombre del cine: "+nombre_cine);
               System.out.println("¿Los datos son correctos? SI(1)");
               res = scanner.nextInt();
@@ -100,6 +118,9 @@ public class ProyectoCMV {
                 insertado = true;
               }
             }
+
+            query = "INSERT INTO Sala (NUMERO, CANTIDAD_BUTACAS, NOMBRE_CINE) VALUES (?, ?, ?)";
+            statement = connection.prepareStatement(query);
 
             statement.setInt(1, numero);
             statement.setInt(2, cantidad_butacas);
@@ -111,16 +132,24 @@ public class ProyectoCMV {
 
             break;
           case 3:
-            query = "SELECT c.nombre, s.numero, s.cantidad_butacas FROM Cine c LEFT JOIN Sala s ON c.nombre = s.nombre_cine GROUP BY c.nombre, s.numero";
+            query = "SELECT c.nombre, s.numero, s.cantidad_butacas FROM Cine c LEFT JOIN Sala s ON c.nombre = s.nombre_cine ORDER BY c.nombre, s.numero";
             statement = connection.prepareStatement(query);
             ResultSet result = statement.executeQuery();
 
             System.out.println("Cines con la información de sus salas");
+            Map<String, Integer> cineSalaMap = new HashMap<>();
             while(result.next()) {
               String nombreCine = result.getString("nombre");
-              int numeroSala = result.getInt("numero");
               int cantidadButacas = result.getInt("cantidad_butacas");
-              System.out.println("Cine: "+nombreCine+" - Número sala: "+numeroSala+" - Butacas en sala: "+cantidadButacas);
+              
+              if (cineSalaMap.containsKey(nombreCine)) {
+                cineSalaMap.put(nombreCine, cineSalaMap.get(nombreCine)+1);
+              } else {
+                cineSalaMap.put(nombreCine, 1);
+              }
+
+              int numeroSalaMostrar = cineSalaMap.get(nombreCine);
+              System.out.println("Cine: "+nombreCine+" - Número sala: "+numeroSalaMostrar+" - Butacas en sala: "+cantidadButacas);
             }
 
             break;
