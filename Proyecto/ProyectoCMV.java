@@ -10,7 +10,7 @@ public class ProyectoCMV {
       String driver = "com.mysql.cj.jdbc.Driver";
       String url = "jdbc:mysql://localhost:3306/ProyectoCMV";
       String username = "root";
-      String password = "joaquin";
+      String password = "root";
 
       // Cargamos el driver, conección con la base de datos y para trabajar con transacciones.
       Class.forName(driver);
@@ -29,8 +29,8 @@ public class ProyectoCMV {
         System.out.println();
         System.out.println("Menú de opciones");
         System.out.println("1. Insertar un cine");
-        System.out.println("2. Insertar una Sala en un Cine");
-        System.out.println("3. Listar los cines con la cantidad total de butacas");
+        System.out.println("2. Insertar una sala en un cine");
+        System.out.println("3. Listar los cines con al información de sus salas");
         System.out.println("4. Salir");
         System.out.print("Seleccione una de las opciones: ");
         int choice = scanner.nextInt();
@@ -111,18 +111,16 @@ public class ProyectoCMV {
 
             break;
           case 3:
-            query = "SELECT c.nombre, SUM(s.cantidad_butacas) AS total_butacas " +
-            "FROM Cine c " +
-            "LEFT JOIN Sala s ON c.nombre = s.nombre_cine " +
-            "GROUP BY c.nombre";
+            query = "SELECT c.nombre, s.numero, s.cantidad_butacas FROM Cine c LEFT JOIN Sala s ON c.nombre = s.nombre_cine GROUP BY c.nombre, s.numero";
             statement = connection.prepareStatement(query);
             ResultSet result = statement.executeQuery();
 
-            System.out.println("Cines con sus butacas totales: ");
+            System.out.println("Cines con la información de sus salas");
             while(result.next()) {
               String nombreCine = result.getString("nombre");
-              int totalButacas = result.getInt("total_butacas");
-              System.out.println("Cine: "+nombreCine+" - Butacas totales: "+totalButacas);
+              int numeroSala = result.getInt("numero");
+              int cantidadButacas = result.getInt("cantidad_butacas");
+              System.out.println("Cine: "+nombreCine+" - Número sala: "+numeroSala+" - Butacas en sala: "+cantidadButacas);
             }
 
             break;
