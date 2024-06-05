@@ -33,7 +33,11 @@ public class ProyectoCMV {
         System.out.println("1. Insertar un cine");
         System.out.println("2. Insertar una sala en un cine");
         System.out.println("3. Listar los cines con la información de sus salas");
-        System.out.println("4. Salir");
+        System.out.println("4. Devolver actores que solo figuran en una pelicula");
+        System.out.println("5. Listar las personas que han sido actores y directores");
+        System.out.println("6. Listas los cines con la cantidad total de butacas");
+        System.out.println("7. Consultas propias");
+        System.out.println("8. Salir");
         System.out.print("Seleccione una de las opciones: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -132,7 +136,9 @@ public class ProyectoCMV {
 
             break;
           case 3:
-            query = "SELECT c.nombre, s.numero, s.cantidad_butacas FROM Cine c LEFT JOIN Sala s ON c.nombre = s.nombre_cine ORDER BY c.nombre, s.numero";
+            query = "SELECT c.nombre, s.numero, s.cantidad_butacas FROM Cine c "+
+            "LEFT JOIN Sala s ON c.nombre = s.nombre_cine ORDER BY c.nombre, "+
+            "s.numero";
             statement = connection.prepareStatement(query);
             ResultSet result = statement.executeQuery();
 
@@ -154,6 +160,94 @@ public class ProyectoCMV {
 
             break;
           case 4:
+            query = "SELECT nombre_protagonista " +
+            "FROM Protagonista " +
+            "JOIN Actuo ON Protagonista.nombre_protagonista = Actuo.nombre_p " +
+            "GROUP BY nombre_protagonista " +
+            "HAVING COUNT(Actuo.ident_pelicula) = 1";
+            statement = connection.prepareStatement(query);
+            result = statement.executeQuery();
+
+            System.out.println("Actores que solo estuvieron en una pelicula");
+            while(result.next()) {
+              String nombre_protagonista = result.getString("nombre_protagonista");
+              System.out.println("Actor: "+nombre_protagonista);
+            }
+
+            break;
+          case 5:
+            query = "SELECT DISTINCT Personal.nombre " +
+            "FROM Personal " +
+            "JOIN Director ON Personal.nombre = Director.nombre_director " +
+            "JOIN Protagonista ON Personal.nombre = Protagonista.nombre_protagonista";
+            statement = connection.prepareStatement(query);
+            result = statement.executeQuery();
+
+            System.out.println("Personas que actuaron y dirigieron");
+            while(result.next()) {
+              nombre = result.getString("nombre");
+              System.out.println("Nombre: "+nombre);
+            }
+
+            break;
+          case 6:
+            query = "SELECT Cine.nombre, SUM(Sala.cantidad_butacas) AS total_butacas " +
+            "FROM Cine " +
+            "JOIN Sala ON Cine.nombre = Sala.nombre_cine " +
+            "GROUP BY Cine.nombre";
+            statement = connection.prepareStatement(query);
+            result = statement.executeQuery();
+
+            System.out.println("Cines con butacas totales");
+            while(result.next()) {
+              String nombreCine = result.getString("nombre");
+              int totalButacas = result.getInt("total_butacas");
+              System.out.println("Cine: "+nombreCine+" - Butacas totales: "+totalButacas);
+            }
+            break;
+          case 7:
+            // Peliculas que duran mas de 1 hora y 45 minutos
+            query = "SELECT titulo_español, duracion FROM Pelicula WHERE duracion > '01:45:00'";
+            statement = connection.prepareStatement(query);
+            result = statement.executeQuery();
+
+            System.out.println("Peliculas que duran más de 01:45:00");
+            while(result.next()) {
+              String titulo = result.getString("titulo_español");
+              Time duracion = result.getTime("duracion");
+              System.out.println("Titulo: "+titulo+" - Duración: "+duracion);
+            }
+            System.out.println();
+
+            // Peliculas entre 2010 y 2015
+            query = "SELECT titulo_español, año_produccion FROM Pelicula WHERE año_produccion BETWEEN 2010 AND 2015";
+            statement = connection.prepareStatement(query);
+            result = statement.executeQuery();
+
+            System.out.println("Peliculas entre 2010 y 2015");
+            while(result.next()) {
+              String titulo = result.getString("titulo_español");
+              int añoP = result.getInt("año_produccion");
+              System.out.println("Titulo: "+titulo+" - Año: "+añoP);
+            }
+            System.out.println();
+
+            // Devuelve los títulos de distribución de las películas que tienen al menos un actor protagonista que ha actuado en más de 3 películas
+            query = "SELECT titulo_distribucion FROM Pelicula WHERE id_pelicula IN (SELECT DISTINCT Actuo.ident_pelicula"+
+              " FROM Actuo JOIN Protagonista ON Actuo.nombre_p = Protagonista.nombre_protagonista WHERE "+
+              "Protagonista.nombre_protagonista IN (SELECT nombre_protagonista FROM Actuo GROUP BY "+
+              "nombre_protagonista HAVING COUNT(ident_pelicula) > 3))";
+            statement = connection.prepareStatement(query);
+            result = statement.executeQuery();
+
+            System.out.println("Películas con actores protagonistas que han actuado en más de 3 películas:");
+            while(result.next()) {
+              String titulo = result.getString("titulo_distribucion");
+              System.out.println("Título: "+titulo);
+            }
+
+            break;
+          case 8:
             menu = true;
             System.out.println("¡Adios!");
             break;
