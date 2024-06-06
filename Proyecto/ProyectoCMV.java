@@ -1,6 +1,4 @@
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class ProyectoCMV {
@@ -12,7 +10,7 @@ public class ProyectoCMV {
       String driver = "com.mysql.cj.jdbc.Driver";
       String url = "jdbc:mysql://localhost:3306/ProyectoCMV";
       String username = "root";
-      String password = "root";
+      String password = "joaquin";
 
       // Cargamos el driver, conección con la base de datos y para trabajar con transacciones.
       Class.forName(driver);
@@ -81,7 +79,7 @@ public class ProyectoCMV {
             break;
           case 2:
             insertado = false;
-            int numero = 0, numeroF = 0, cantidad_butacas = 0;
+            int numero = 0, cantidad_butacas = 0;
             String nombre_cine = "";
             res = 0;
 
@@ -102,18 +100,7 @@ public class ProyectoCMV {
                 numero = 1;
               }
 
-              // Obtener el número a mostrar, el no real
-              query = "SELECT COUNT(numero) AS max_numero FROM Sala WHERE nombre_cine = ?";
-              statement = connection.prepareStatement(query);
-              statement.setString(1, nombre_cine);
-              result = statement.executeQuery();
-              if (result.next()) {
-                numeroF = result.getInt("max_numero")+1;
-              } else {
-                numeroF = 1;
-              }
-
-              System.out.println("Número de sala: "+numeroF+" - Cantidad de butacas: "+cantidad_butacas
+              System.out.println("Número de sala: "+numero+" - Cantidad de butacas: "+cantidad_butacas
               +" - Nombre del cine: "+nombre_cine);
               System.out.println("¿Los datos son correctos? SI(1)");
               res = scanner.nextInt();
@@ -143,19 +130,11 @@ public class ProyectoCMV {
             ResultSet result = statement.executeQuery();
 
             System.out.println("Cines con la información de sus salas");
-            Map<String, Integer> cineSalaMap = new HashMap<>();
             while(result.next()) {
               String nombreCine = result.getString("nombre");
+              int numeroSala = result.getInt("numero");
               int cantidadButacas = result.getInt("cantidad_butacas");
-              
-              if (cineSalaMap.containsKey(nombreCine)) {
-                cineSalaMap.put(nombreCine, cineSalaMap.get(nombreCine)+1);
-              } else {
-                cineSalaMap.put(nombreCine, 1);
-              }
-
-              int numeroSalaMostrar = cineSalaMap.get(nombreCine);
-              System.out.println("Cine: "+nombreCine+" - Número sala: "+numeroSalaMostrar+" - Butacas en sala: "+cantidadButacas);
+              System.out.println("Cine: "+nombreCine+" - Número sala: "+numeroSala+" - Butacas en sala: "+cantidadButacas);
             }
 
             break;
@@ -176,16 +155,19 @@ public class ProyectoCMV {
 
             break;
           case 5:
-            query = "SELECT DISTINCT Personal.nombre " +
-            "FROM Personal " +
-            "JOIN Director ON Personal.nombre = Director.nombre_director " +
-            "JOIN Protagonista ON Personal.nombre = Protagonista.nombre_protagonista";
+            query = "SELECT DISTINCT nombre_director " +
+                    "FROM Director " +
+                    "JOIN Protagonista ON Director.nombre_director = Protagonista.nombre_protagonista " +
+                    "UNION " +
+                    "SELECT DISTINCT nombre_director " +
+                    "FROM Director " +
+                    "JOIN Reparto ON Director.nombre_director = Reparto.nombre_reparto";
             statement = connection.prepareStatement(query);
             result = statement.executeQuery();
 
             System.out.println("Personas que actuaron y dirigieron");
             while(result.next()) {
-              nombre = result.getString("nombre");
+              nombre = result.getString("nombre_director");
               System.out.println("Nombre: "+nombre);
             }
 
@@ -256,6 +238,7 @@ public class ProyectoCMV {
         }
       }
 
+      scanner.close();
       connection.close();
      
     } catch(ClassNotFoundException cnfe) {

@@ -2,7 +2,7 @@
 SELECT nombre_protagonista FROM Protagonista JOIN Actuo ON Protagonista.nombre_protagonista = Actuo.nombre_p GROUP BY nombre_protagonista HAVING COUNT(Actuo.ident_pelicula) = 1
             
 -Personas que actuaron y dirigieron
-SELECT DISTINCT Personal.nombre FROM Personal JOIN Director ON Personal.nombre = Director.nombre_director JOIN Protagonista ON Personal.nombre = Protagonista.nombre_protagonista
+SELECT DISTINCT nombre_director FROM Director JOIN Protagonista ON Director.nombre_director = Protagonista.nombre_protagonista UNION SELECT DISTINCT nombre_director FROM Director JOIN Reparto ON Director.nombre_director = Reparto.nombre_reparto
 
 -Cines con butacas totales
 SELECT Cine.nombre, SUM(Sala.cantidad_butacas) AS total_butacas FROM Cine JOIN Sala ON Cine.nombre = Sala.nombre_cine GROUP BY Cine.nombre
@@ -15,3 +15,4 @@ SELECT titulo_español, año_produccion FROM Pelicula WHERE año_produccion BETW
 
 -Devuelve los títulos de distribución de las películas que tienen al menos un actor protagonista que ha actuado en más de 3 películas
 SELECT titulo_distribucion FROM Pelicula WHERE id_pelicula IN (SELECT DISTINCT Actuo.ident_pelicula FROM Actuo JOIN Protagonista ON Actuo.nombre_p = Protagonista.nombre_protagonista WHERE Protagonista.nombre_protagonista IN (SELECT nombre_protagonista FROM Actuo GROUP BY nombre_protagonista HAVING COUNT(ident_pelicula) > 3))
+
